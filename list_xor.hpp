@@ -80,6 +80,17 @@ public:
     return *this;
   }
 
+  ListXor<T>& push_front(T data) {
+
+    auto* node = new Node;
+
+    node->data=data;
+    node->next_prev=Oper(head,node);
+    head=node;
+    ++this->size;
+    return *this;
+  }
+
   template<typename F>
   ListXor<T>& apply(F func){
     auto *previus = this->head,*current=this->head;
