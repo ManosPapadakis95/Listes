@@ -56,14 +56,21 @@ namespace Listes {
       }
 #endif
       auto *previus = this->head, *current = this->head;
-      for (int j = 0; j < i; ++j) {
+      for (unsigned int j = 0; j < i; ++j) {
         auto* next = Oper(previus, current->next_prev);
         previus = current;
         current = next;
       }
       return current->data;
     }
-    XorList<T>& insert(int i, T data) {
+    XorList<T>& insert(unsigned int i, T data) {
+#ifdef XOR_LIST_SAFE
+      if (i >= this->sz) {
+        cerr << "Error: out of bounds using index \'" + to_string(i) + "\'\n";
+        std::terminate();
+      }
+#endif
+
       auto *previus = this->head, *current = this->head;
       for (unsigned int j = 0; j < i; ++j) {
         auto* next = Oper(previus, current->next_prev);
@@ -73,9 +80,11 @@ namespace Listes {
 
       auto* node = new Node;
       node->data = data;
-      node->next_prev = previus;
+      node->next_prev = Oper(previus,current);
 
-      current->next_prev = Oper(previus, node);
+      previus->next_prev = Oper(Oper(previus->next_prev, current), node);
+
+      current->next_prev = Oper(Oper(current->next_prev, previus), node);
       ++this->sz;
       return *this;
     }
