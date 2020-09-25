@@ -49,7 +49,7 @@ public:
     delete this->centinel;
     this->head=this->centinel=nullptr;
   }
-  T get(int i) const {
+  T get(unsigned int i) const {
     if(i>=this->sz){
       cerr<<"Error: out of bounds using index \'"+to_string(i)+"\'\n";
       std::terminate();
@@ -100,6 +100,21 @@ public:
     node->next_prev=Oper(head,node);
     head=node;
     ++this->sz;
+    return *this;
+  }
+
+  XorList<T>& pop_front() {
+    if(this->sz<1){
+      cerr<<"Error: the list is empty.\n";
+      std::terminate();
+    }else{
+      auto *next=Oper(head,head->next_prev);
+
+      next->next_prev=Oper(next,Oper(head,next->next_prev));
+      delete head;
+      head=next;
+      --this->sz;
+    }
     return *this;
   }
 
