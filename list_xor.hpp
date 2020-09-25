@@ -2,8 +2,8 @@
 
 
 #include <iostream>       // std::cout, std::cerr
-#include <exception>      // std::exception, std::terminate
-#include <string>
+#include <exception>      // std::terminate
+#include <string>     // std::to_string
 
 using namespace std;
 
@@ -19,7 +19,6 @@ namespace Listes {
       Node* next_prev = nullptr;
     };
 
-    //Node* previus=nullptr; //  previus of centinel
     Node* centinel = nullptr; // previus of the new node or the last node
     unsigned int sz = 0;
 
@@ -50,20 +49,19 @@ namespace Listes {
       this->head = this->centinel = nullptr;
     }
     T get(unsigned int i) const {
+#ifdef XOR_LIST_SAFE
       if (i >= this->sz) {
         cerr << "Error: out of bounds using index \'" + to_string(i) + "\'\n";
         std::terminate();
       }
-      else {
-        auto *previus = this->head, *current = this->head;
-        for (int j = 0; j < i; ++j) {
-          auto* next = Oper(previus, current->next_prev);
-          previus = current;
-          current = next;
-        }
-        return current->data;
+#endif
+      auto *previus = this->head, *current = this->head;
+      for (int j = 0; j < i; ++j) {
+        auto* next = Oper(previus, current->next_prev);
+        previus = current;
+        current = next;
       }
-      return head->data;
+      return current->data;
     }
     XorList<T>& insert(int i, T data) {
       auto *previus = this->head, *current = this->head;
@@ -108,33 +106,36 @@ namespace Listes {
     }
 
     XorList<T>& pop_front() {
+#ifdef XOR_LIST_SAFE
       if (this->sz < 1) {
         cerr << "Error: the list is empty.\n";
         std::terminate();
       }
-      else {
-        auto *next = Oper(head, head->next_prev);
+#endif
+      auto *next = Oper(head, head->next_prev);
 
-        next->next_prev = Oper(next, Oper(head, next->next_prev));
-        delete head;
-        head = next;
-        --this->sz;
-      }
+      next->next_prev = Oper(next, Oper(head, next->next_prev));
+      delete head;
+      head = next;
+      --this->sz;
       return *this;
     }
 
     XorList<T>& pop_back() {
+
+#ifdef XOR_LIST_SAFE
       if (this->sz < 1) {
         cerr << "Error: the list is empty.\n";
         std::terminate();
       }
-      else {
-        auto *new_centinel = previus_centinel();
-        new_centinel->next_prev = Oper(new_centinel,Oper(new_centinel->next_prev, centinel));
-        delete this->centinel;
-        this->centinel = new_centinel;
-        --this->sz;
-      }
+#endif
+
+      auto *new_centinel = previus_centinel();
+      new_centinel->next_prev = Oper(new_centinel,Oper(new_centinel->next_prev, centinel));
+      delete this->centinel;
+      this->centinel = new_centinel;
+      --this->sz;
+
       return *this;
     }
 
