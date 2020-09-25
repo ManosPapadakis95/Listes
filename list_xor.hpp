@@ -8,130 +8,150 @@
 using namespace std;
 
 
-namespace Listes{
+namespace Listes {
 
 
-template<class T>
-class XorList {
+  template<class T>
+  class XorList {
 
-  struct Node {
-    T data;
-    Node* next_prev=nullptr;
-  };
+    struct Node {
+      T data;
+      Node* next_prev = nullptr;
+    };
 
-  //Node* previus=nullptr; //  previus of centinel
-  Node* centinel=nullptr; // previus of the new node or the last node
-  unsigned int sz=0;
+    //Node* previus=nullptr; //  previus of centinel
+    Node* centinel = nullptr; // previus of the new node or the last node
+    unsigned int sz = 0;
 
-  Node* head=nullptr;
+    Node* head = nullptr;
 
-  inline static Node* Oper(Node* x,Node* y){
-    return reinterpret_cast<Node*>(reinterpret_cast<uintptr_t>(x) xor reinterpret_cast<uintptr_t>(y));
-  }
-  inline static Node* previus(){
-    return Oper(XorList<T>::centinel,XorList<T>::centinel->next_prev);
-  }
-
-public:
-
-  XorList() : centinel(new Node), head(centinel) {}
-
-  ~XorList(){
-    // Current is the second node
-    auto *previus = this->head,*current=Oper(this->head, this->head->next_prev);
-    for(unsigned int j=1;j<this->sz;++j){
-      auto* next=Oper(previus,current->next_prev);
-      delete previus;
-      previus=current;
-      current=next;
+    inline static Node* Oper(Node* x, Node* y) {
+      return reinterpret_cast<Node*>(reinterpret_cast<uintptr_t>(x) xor reinterpret_cast<uintptr_t>(y));
     }
-    this->sz=0;
-    delete this->centinel;
-    this->head=this->centinel=nullptr;
-  }
-  T get(unsigned int i) const {
-    if(i>=this->sz){
-      cerr<<"Error: out of bounds using index \'"+to_string(i)+"\'\n";
-      std::terminate();
-    }else{
-      auto *previus = this->head,*current=this->head;
-      for(int j=0;j<i;++j){
-        auto* next=Oper(previus,current->next_prev);
-        previus=current;
-        current=next;
+    inline Node* previus_centinel() {
+      return Oper(centinel,centinel->next_prev);
+    }
+
+  public:
+
+    XorList() : centinel(new Node), head(centinel) {}
+
+    ~XorList() {
+      // Current is the second node
+      auto *previus = this->head, *current = Oper(this->head, this->head->next_prev);
+      for (unsigned int j = 1; j < this->sz; ++j) {
+        auto* next = Oper(previus, current->next_prev);
+        delete previus;
+        previus = current;
+        current = next;
       }
-      return current->data;
+      this->sz = 0;
+      delete this->centinel;
+      this->head = this->centinel = nullptr;
     }
-    return head->data;
-  }
-  XorList<T>& insert(int i,T data) {
-    auto *previus = this->head,*current=this->head;
-    for(unsigned int j=0;j<i;++j){
-      auto* next=Oper(previus,current->next_prev);
-      previus=current;
-      current=next;
+    T get(unsigned int i) const {
+      if (i >= this->sz) {
+        cerr << "Error: out of bounds using index \'" + to_string(i) + "\'\n";
+        std::terminate();
+      }
+      else {
+        auto *previus = this->head, *current = this->head;
+        for (int j = 0; j < i; ++j) {
+          auto* next = Oper(previus, current->next_prev);
+          previus = current;
+          current = next;
+        }
+        return current->data;
+      }
+      return head->data;
+    }
+    XorList<T>& insert(int i, T data) {
+      auto *previus = this->head, *current = this->head;
+      for (unsigned int j = 0; j < i; ++j) {
+        auto* next = Oper(previus, current->next_prev);
+        previus = current;
+        current = next;
+      }
+
+      auto* node = new Node;
+      node->data = data;
+      node->next_prev = previus;
+
+      current->next_prev = Oper(previus, node);
+      ++this->sz;
+      return *this;
+    }
+    XorList<T>& push_back(T data) {
+
+      auto* node = new Node;
+
+      node->next_prev = Oper(node, centinel);
+      centinel->data = data;
+      centinel->next_prev = Oper(previus_centinel(),node);
+      centinel = node;
+      ++this->sz;
+      return *this;
     }
 
-    auto* node = new Node;
-    node->data=data;
-    node->next_prev=previus;
+    XorList<T>& push_front(T data) {
 
-    current->next_prev=Oper(previus,node);
-    ++this->sz;
-    return *this;
-  }
-  XorList<T>& push_back(T data) {
+      auto* node = new Node, *next = Oper(head, head->next_prev);
 
-    auto* node = new Node;
+      
 
-    centinel->data=data;
-    centinel->next_prev=Oper(previus(),node);
-    centinel=node;
-    ++this->sz;
-    return *this;
-  }
-
-  XorList<T>& push_front(T data) {
-
-    auto* node = new Node, *next=Oper(head,head->next_prev);
-
-    head->next_prev=Oper(node,next);
-    node->data=data;
-    node->next_prev=Oper(head,node);
-    head=node;
-    ++this->sz;
-    return *this;
-  }
-
-  XorList<T>& pop_front() {
-    if(this->sz<1){
-      cerr<<"Error: the list is empty.\n";
-      std::terminate();
-    }else{
-      auto *next=Oper(head,head->next_prev);
-
-      next->next_prev=Oper(next,Oper(head,next->next_prev));
-      delete head;
-      head=next;
-      --this->sz;
+      head->next_prev = Oper(node, next); 
+      node->data = data;
+      node->next_prev = Oper(head,node);
+      head = node;
+      ++this->sz;
+      return *this;
     }
-    return *this;
-  }
 
-  template<typename F>
-  XorList<T>& apply(F func){
-    auto *previus = this->head,*current=this->head;
-    for(unsigned int j=0;j<this->sz;++j){
-      func(current->data);
-      auto* next=Oper(previus,current->next_prev);
-      previus=current;
-      current=next;
+    XorList<T>& pop_front() {
+      if (this->sz < 1) {
+        cerr << "Error: the list is empty.\n";
+        std::terminate();
+      }
+      else {
+        auto *next = Oper(head, head->next_prev);
+
+        next->next_prev = Oper(next, Oper(head, next->next_prev));
+        delete head;
+        head = next;
+        --this->sz;
+      }
+      return *this;
     }
-    return *this;
-  }
 
-  inline unsigned int size() const {
-    return this->sz;
-  }
-};
+    XorList<T>& pop_back() {
+      if (this->sz < 1) {
+        cerr << "Error: the list is empty.\n";
+        std::terminate();
+      }
+      else {
+        auto *new_centinel = previus_centinel();
+        new_centinel->next_prev = Oper(new_centinel,Oper(new_centinel->next_prev, centinel));
+        delete this->centinel;
+        this->centinel = new_centinel;
+        --this->sz;
+      }
+      return *this;
+    }
+
+    template<typename F>
+    XorList<T>& apply(F func) {
+      auto *previus = this->head, *current = this->head;
+      for (unsigned int j = 0; j < this->sz; ++j) {
+        func(current->data);
+        auto* next = Oper(previus, current->next_prev);
+        previus = current;
+        current = next;
+      }
+      return *this;
+    }
+
+    inline unsigned int size() const {
+      return this->sz;
+    }
+  };
 };
