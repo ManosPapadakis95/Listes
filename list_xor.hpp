@@ -1,5 +1,12 @@
-
 #pragma once
+
+
+#include <iostream>       // std::cout, std::cerr
+#include <exception>      // std::exception, std::terminate
+#include <string>
+
+using namespace std;
+
 
 namespace Listes{
 
@@ -43,13 +50,19 @@ public:
     this->head=this->centinel=nullptr;
   }
   T get(int i) const {
-    auto *previus = previus(),*current=this->head;
-    for(int j=0;j<i;++j){
-      auto* next=Oper(previus,current->next_prev);
-      previus=current;
-      current=next;
+    if(i>=this->sz){
+      cerr<<"Error: out of bounds using index \'"+to_string(i)+"\'\n";
+      std::terminate();
+    }else{
+      auto *previus = this->head,*current=this->head;
+      for(int j=0;j<i;++j){
+        auto* next=Oper(previus,current->next_prev);
+        previus=current;
+        current=next;
+      }
+      return current->data;
     }
-    return current->data;
+    return head->data;
   }
   XorList<T>& insert(int i,T data) {
     auto *previus = this->head,*current=this->head;
