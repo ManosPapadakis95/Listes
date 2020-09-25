@@ -14,7 +14,7 @@ class XorList {
 
   //Node* previus=nullptr; //  previus of centinel
   Node* centinel=nullptr; // previus of the new node or the last node
-  unsigned int size=0;
+  unsigned int sz=0;
 
   Node* head=nullptr;
 
@@ -33,10 +33,8 @@ public:
   }
 
   ~XorList(){
-    auto *previus = this->head,*current=this->head;
-    auto* next = Oper(previus, current->next_prev);
-    previus = current;
-    current = next;
+    // Current is the second node
+    auto *previus = this->head,*current=Oper(this->head, this->head->next_prev);
     for(unsigned int j=1;j<this->sz;++j){
       auto* next=Oper(previus,current->next_prev);
       delete previus;
@@ -45,10 +43,10 @@ public:
     }
     this->sz=0;
     delete this->centinel;
-    this->head=this->previus=this->centinel=nullptr;
+    this->head=this->centinel=nullptr;
   }
   T get(int i) const {
-    auto *previus = this->previus,*current=this->head;
+    auto *previus = previus(),*current=this->head;
     for(int j=0;j<i;++j){
       auto* next=Oper(previus,current->next_prev);
       previus=current;
@@ -57,8 +55,8 @@ public:
     return current->data;
   }
   XorList<T>& insert(int i,T data) {
-    auto *previus = this->previus,*current=this->head;
-    for(int j=0;j<i;++j){
+    auto *previus = this->head,*current=this->head;
+    for(unsigned int j=0;j<i;++j){
       auto* next=Oper(previus,current->next_prev);
       previus=current;
       current=next;
