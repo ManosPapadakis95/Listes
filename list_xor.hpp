@@ -22,15 +22,12 @@ class XorList {
     return reinterpret_cast<Node*>(reinterpret_cast<uintptr_t>(x) xor reinterpret_cast<uintptr_t>(y));
   }
   inline static Node* previus(){
-    return Oper(this->centinel,this->centinel->next_prev);
+    return Oper(XorList<T>::centinel,XorList<T>::centinel->next_prev);
   }
 
 public:
 
-  XorList(){
-    this->head = new Node;
-    this->centinel=this->head;
-  }
+  XorList() : centinel(new Node), head(centinel) {}
 
   ~XorList(){
     // Current is the second node
